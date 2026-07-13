@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard | Grok Access</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="config.js"></script>
+<script src="database.js"></script>
+<script src="script.js" defer></script>
+
+</head>
+
+<body onload="loadDashboard()">
+
+<canvas id="bg"></canvas>
+
+<div class="card">
+
+<h1 id="dashboard-title">
+👑 GROK ACCESS
+</h1>
+
+<h2 id="user-name"></h2>
+
+<div id="role-badge" class="badge">
+Loading...
+</div>
+
+<div class="profile-box">
+
+<p><strong>Role</strong></p>
+<h3 id="user-role"></h3>
+
+<hr>
+
+<p><strong>Clearance</strong></p>
+<h3 id="user-clearance"></h3>
+
+<hr>
+
+<p><strong>Status</strong></p>
+<h3 id="user-status"></h3>
+
+<hr>
+
+<p><strong>Serial Number</strong></p>
+<h3 id="user-serial"></h3>
+
+</div>
+
+<div class="grid">
+  <button onclick="showMembers()">
+👥 Members
+</button>
+
+<button onclick="showNotifications()">
+🔔 Notifications
+</button>
+
+<button onclick="showSystemStatus()">
+📊 System Status
+</button>
+
+<button onclick="showProfile()">
+🪪 My Profile
+</button>
+
+<button onclick="showWebsite()">
+🌐 Portal
+</button>
+
+<button onclick="showSettings()">
+⚙️ Settings
+</button>
+
+</div>
+
+<button class="logout-btn" onclick="logout()">
+🚪 Logout
+</button>
+
+</div>
+
+<!-- Information Modal -->
+
+<div id="modal" class="modal">
+
+<div class="modal-content">
+
+<h2 id="modal-title">Information</h2>
+
+<p id="modal-text"></p>
+
+<button onclick="closeModal()">
+Close
+</button>
+
+</div>
+
+</div>
+
+</body>
+
+</html>
