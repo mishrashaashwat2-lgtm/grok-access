@@ -1,250 +1,267 @@
-// ==============================
-// GROK ACCESS v5.0
-// Main Script
-// ==============================
+// GROK ACCESS v6.0
+// Part 1
 
-let currentUser = null;
+function getUsers() {
 
-// ------------------------------
-// LOGIN
-// ------------------------------
+    let saved = localStorage.getItem("grok_users");
+
+    if (saved) {
+        return JSON.parse(saved);
+    }
+
+    localStorage.setItem(
+        "grok_users",
+        JSON.stringify(users)
+    );
+
+    return JSON.parse(
+        localStorage.getItem("grok_users")
+    );
+
+}
+
+function saveUsers(updatedUsers) {
+
+    localStorage.setItem(
+        "grok_users",
+        JSON.stringify(updatedUsers)
+    );
+
+}
 
 function login() {
 
-    const token = document.getElementById("token").value.trim().toUpperCase();
-    const password = document.getElementById("password").value.trim();
+    const token =
+        document.getElementById("token").value.trim();
 
-    if (!users[token]) {
+    const password =
+        document.getElementById("password").value;
+
+    const db = getUsers();
+
+    if (!db[token]) {
+
         alert("Invalid Token ID");
+
         return;
+
     }
 
-    if (users[token].password !== password) {
+    if (db[token].password !== password) {
+
         alert("Incorrect Password");
+
         return;
+
     }
 
-    sessionStorage.setItem("loggedUser", token);
+    localStorage.setItem(
+        "currentUser",
+        token
+    );
 
-    window.location.href = "dashboard.html";
+    if (db[token].firstLogin) {
+
+        window.location =
+            "change-password.html";
+
+        return;
+
+    }
+
+    window.location =
+        "dashboard.html";
 
 }
+// GROK ACCESS v6.0
+// Part 2
 
-// ------------------------------
-// LOAD DASHBOARD
-// ------------------------------
+function changePassword() {
+
+    const password =
+        document.getElementById("newPassword").value;
+
+    const confirm =
+        document.getElementById("confirmPassword").value;
+
+    if (password.length < 8) {
+
+        alert("Password must be at least 8 characters.");
+
+        return;
+
+    }
+
+    if (password !== confirm) {
+
+        alert("Passwords do not match.");
+
+        return;
+
+    }
+
+    const token =
+        localStorage.getItem("currentUser");
+
+    const db =
+        getUsers();
+
+    db[token].password = password;
+
+    db[token].firstLogin = false;
+
+    saveUsers(db);
+
+    alert("Password changed successfully!");
+
+    window.location = "dashboard.html";
+
+}
 
 function loadDashboard() {
 
-    const token = sessionStorage.getItem("loggedUser");
+    const token =
+        localStorage.getItem("currentUser");
 
     if (!token) {
-        window.location.href = "login.html";
+
+        window.location = "login.html";
+
         return;
+
     }
 
-    currentUser = users[token];
+    const db =
+        getUsers();
 
-    document.getElementById("user-name").textContent = currentUser.name;
-    document.getElementById("user-role").textContent = currentUser.role;
-    document.getElementById("user-clearance").textContent = currentUser.clearance;
-    document.getElementById("user-status").textContent = currentUser.status;
-    document.getElementById("user-serial").textContent = currentUser.serial;
+    const user =
+        db[token];
 
-    applyTheme(currentUser.theme);
+    document.getElementById("user-name").innerText =
+        user.name;
 
-    setRoleBadge();
+    document.getElementById("user-role").innerText =
+        user.role;
 
-}
+    document.getElementById("user-clearance").innerText =
+        user.clearance;
 
-// ------------------------------
-// ROLE BADGE
-// ------------------------------
+    document.getElementById("user-status").innerText =
+        user.status;
 
-function setRoleBadge(){
+    document.getElementById("user-serial").innerText =
+        user.serial;
 
-    const badge = document.getElementById("role-badge");
+    const badge =
+        document.getElementById("role-badge");
+
+    badge.innerText = user.role;
 
     badge.className = "badge";
 
-    switch(currentUser.role){
-
-        case "ADMINISTRATOR":
-
-            badge.classList.add("admin-badge");
-            badge.innerHTML="👑 ADMINISTRATOR";
-            break;
-
-        case "CO-ADMINISTRATOR":
-
-            badge.classList.add("coadmin-badge");
-            badge.innerHTML="🛡 CO-ADMINISTRATOR";
-            break;
-
-        case "UI DEVELOPER":
-
-            badge.classList.add("developer-badge");
-            badge.innerHTML="💻 UI DEVELOPER";
-            break;
-
-        default:
-
-            badge.classList.add("member-badge");
-            badge.innerHTML="👤 MEMBER";
-
-    }
-
-}
-
-// ------------------------------
-// THEMES
-// ------------------------------
-
-function applyTheme(theme){
-
-    document.body.classList.remove(
-        "gold-theme",
-        "blue-theme",
-        "purple-theme",
-        "green-theme"
-    );
-
-    switch(theme){
+    switch(user.theme){
 
         case "gold":
             document.body.classList.add("gold-theme");
+            badge.classList.add("admin-badge");
             break;
 
         case "blue":
             document.body.classList.add("blue-theme");
+            badge.classList.add("coadmin-badge");
             break;
 
         case "purple":
             document.body.classList.add("purple-theme");
+            badge.classList.add("developer-badge");
             break;
 
         default:
             document.body.classList.add("green-theme");
+            badge.classList.add("member-badge");
 
     }
 
 }
-// ==============================
-// MODAL FUNCTIONS
-// ==============================
 
-function showModal(title, text){
+function logout(){
 
-    const modal = document.getElementById("modal");
-    const modalTitle = document.getElementById("modal-title");
-    const modalText = document.getElementById("modal-text");
+    localStorage.removeItem("currentUser");
 
-    modalTitle.innerHTML = title;
-    modalText.innerHTML = text;
+    window.location = "index.html";
 
-    modal.style.display = "flex";
+}
+
+function openModal(title,text){
+
+    document.getElementById("modal-title").innerText=title;
+
+    document.getElementById("modal-text").innerText=text;
+
+    document.getElementById("modal").style.display="flex";
+
 }
 
 function closeModal(){
 
-    document.getElementById("modal").style.display = "none";
+    document.getElementById("modal").style.display="none";
 
 }
-
-// ==============================
-// DASHBOARD BUTTONS
-// ==============================
 
 function showMembers(){
 
-    let html = "";
+    openModal(
 
-    for(const token in users){
+        "Members",
 
-        const u = users[token];
+`Administrator
+Co-Administrator
+UI Developer
+Members`
 
-        html += `
-        <b>${u.name}</b><br>
-        Token : ${token}<br>
-        Role : ${u.role}<br>
-        Clearance : ${u.clearance}<br>
-        Status : ${u.status}
-        <hr>
-        `;
-
-    }
-
-    showModal("👥 MEMBER DIRECTORY", html);
-
-}
-
-function showSystemStatus(){
-
-    showModal(
-        "📊 SYSTEM STATUS",
-        `
-        <b>Portal</b><br>${CONFIG.portalName}<br><br>
-
-        <b>Version</b><br>${CONFIG.version}<br><br>
-
-        <b>Organization</b><br>${CONFIG.organization}<br><br>
-
-        <b>Status</b><br>${CONFIG.systemStatus}
-        `
-    );
-
-}
-
-function showProfile(){
-
-    showModal(
-        "🪪 MY PROFILE",
-        `
-        <b>Name</b><br>${currentUser.name}<br><br>
-
-        <b>Role</b><br>${currentUser.role}<br><br>
-
-        <b>Gender</b><br>${currentUser.gender}<br><br>
-
-        <b>Clearance</b><br>${currentUser.clearance}<br><br>
-
-        <b>Serial Number</b><br>${currentUser.serial}
-        `
     );
 
 }
 
 function showNotifications(){
 
-    showModal(
-        "🔔 NOTIFICATIONS",
-        `
-        ✅ Welcome ${currentUser.name}<br><br>
+    openModal(
 
-        ✅ ${CONFIG.portalName} is online.<br><br>
+        "Notifications",
 
-        ✅ Security clearance verified.<br><br>
+        "No new notifications."
 
-        ✅ Have a productive session.
-        `
     );
 
 }
 
-function showSettings(){
+function showSystemStatus(){
 
-    showModal(
-        "⚙ SETTINGS",
-        `
-        Website<br>
-        ${CONFIG.website}<br><br>
+    openModal(
 
-        Support<br>
-        ${CONFIG.support}<br><br>
+        "System Status",
 
-        Issue Date<br>
-        ${CONFIG.issueDate}
-        `
+        "🟢 GROK ACCESS is ONLINE"
+
+    );
+
+}
+
+function showProfile(){
+
+    const db=getUsers();
+
+    const user=db[localStorage.getItem("currentUser")];
+
+    openModal(
+
+        "My Profile",
+
+        user.name +
+        "\n\nRole: " + user.role +
+        "\nClearance: " + user.clearance +
+        "\nStatus: " + user.status
+
     );
 
 }
@@ -255,83 +272,15 @@ function showWebsite(){
 
 }
 
-// ==============================
-// LOGOUT
-// ==============================
+function showSettings(){
 
-function logout(){
+    openModal(
 
-    sessionStorage.removeItem("loggedUser");
+        "Settings",
 
-    window.location.href="index.html";
+        "Settings module coming in Version 6.1"
+
+    );
 
 }
-
-// ==============================
-// BACKGROUND ANIMATION
-// ==============================
-
-window.addEventListener("load",()=>{
-
-    const canvas=document.getElementById("bg");
-
-    if(!canvas) return;
-
-    const ctx=canvas.getContext("2d");
-
-    function resize(){
-
-        canvas.width=window.innerWidth;
-        canvas.height=window.innerHeight;
-
-    }
-
-    resize();
-
-    window.addEventListener("resize",resize);
-
-    const particles=[];
-
-    for(let i=0;i<140;i++){
-
-        particles.push({
-
-            x:Math.random()*canvas.width,
-            y:Math.random()*canvas.height,
-            r:Math.random()*2+1,
-            s:Math.random()*0.8+0.2
-
-        });
-
-    }
-
-    function animate(){
-
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-
-        ctx.fillStyle="#00ffe7";
-
-        particles.forEach(p=>{
-
-            p.y+=p.s;
-
-            if(p.y>canvas.height){
-
-                p.y=0;
-                p.x=Math.random()*canvas.width;
-
-            }
-
-            ctx.beginPath();
-            ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-            ctx.fill();
-
-        });
-
-        requestAnimationFrame(animate);
-
-    }
-
-    animate();
-
-});
+    
