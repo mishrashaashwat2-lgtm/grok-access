@@ -283,4 +283,17 @@ function showSettings(){
     );
 
 }
-    
+function resetPortalData(){
+
+    if(!confirm("Reset all portal data?")){
+        return;
+    }
+
+    localStorage.removeItem("grok_users");
+    localStorage.removeItem("currentUser");
+
+    alert("Portal data has been reset.");
+
+    location.reload();
+
+}
